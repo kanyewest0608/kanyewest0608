@@ -1,96 +1,66 @@
-# text_rpg_game.py
 import streamlit as st
-import random
 
-st.set_page_config(page_title="텍스트 RPG 🧝‍♀️")
+st.title("🎧 기분별 칸예 웨스트 노래 추천")
 
-st.title("🗺️ Streamlit 텍스트 RPG")
+mood = st.selectbox(
+    "오늘 당신의 기분은 어떤가요?",
+    [
+        "행복해요 😄",
+        "우울해요 😢",
+        "에너지가 넘쳐요 ⚡",
+        "차분해요 🧘‍♂️",
+        "화가 나요 😡",
+        "사랑에 빠졌어요 ❤️",
+        "감성적이에요 💭",
+        "자신감 넘쳐요 💪"
+    ]
+)
 
-# 초기 상태 설정
-if "hp" not in st.session_state:
-    st.session_state.hp = 100
-    st.session_state.gold = 50
-    st.session_state.stage = "start"
-    st.session_state.log = []
+songs = {
+    "행복해요 😄": {
+        "title": "Good Life",
+        "lyrics": "Welcome to the good life, where nothing's too serious.",
+        "youtube": "https://www.youtube.com/watch?v=FEKEjpTzB0Q"
+    },
+    "우울해요 😢": {
+        "title": "Hey Mama",
+        "lyrics": "Hey Mama, I wanna scream so loud for you.",
+        "youtube": "https://www.youtube.com/watch?v=6CHs4x2uqcQ"
+    },
+    "에너지가 넘쳐요 ⚡": {
+        "title": "Stronger",
+        "lyrics": "Work it, make it, do it, makes us harder, better, faster, stronger.",
+        "youtube": "https://www.youtube.com/watch?v=PsO6ZnUZI0g"
+    },
+    "차분해요 🧘‍♂️": {
+        "title": "Ultralight Beam",
+        "lyrics": "This is a God dream, this is everything.",
+        "youtube": "https://www.youtube.com/watch?v=6F0P2Fv1c0E"
+    },
+    "화가 나요 😡": {
+        "title": "Black Skinhead",
+        "lyrics": "For my theme song, my leather black jeans on.",
+        "youtube": "https://www.youtube.com/watch?v=YL3f5OHh06g"
+    },
+    "사랑에 빠졌어요 ❤️": {
+        "title": "Bound 2",
+        "lyrics": "I know you're tired of loving, of loving with nobody to love.",
+        "youtube": "https://www.youtube.com/watch?v=7fAHtuMko6I"
+    },
+    "감성적이에요 💭": {
+        "title": "Devil In a New Dress",
+        "lyrics": "Put your hands to the constellations, the way you look should be a sin, you my sensation.",
+        "youtube": "https://www.youtube.com/watch?v=9A_q6f2QZ8k"
+    },
+    "자신감 넘쳐요 💪": {
+        "title": "Power",
+        "lyrics": "No one man should have all that power.",
+        "youtube": "https://www.youtube.com/watch?v=L53gjP-TtGE"
+    }
+}
 
-# 상태 표시
-st.markdown(f"**❤️ 체력:** {st.session_state.hp} / 100")
-st.markdown(f"**🪙 골드:** {st.session_state.gold}")
-st.markdown("---")
-
-def battle():
-    enemy_hp = 40
-    log = ""
-    while enemy_hp > 0 and st.session_state.hp > 0:
-        player_dmg = random.randint(10, 20)
-        enemy_dmg = random.randint(5, 15)
-        enemy_hp -= player_dmg
-        st.session_state.hp -= enemy_dmg
-        log += f"🔪 당신이 {player_dmg} 데미지를 입혔고, 적에게 {enemy_dmg} 데미지를 받았습니다.\n"
-    if st.session_state.hp > 0:
-        reward = random.randint(10, 30)
-        st.session_state.gold += reward
-        log += f"🎉 승리! {reward}골드를 얻었습니다."
-        st.session_state.stage = "crossroad"
-    else:
-        log += "💀 당신은 쓰러졌습니다..."
-        st.session_state.stage = "dead"
-    return log
-
-# 스토리 분기
-if st.session_state.stage == "start":
-    st.write("깊은 숲속에서 눈을 뜬 당신은 길이 두 갈래로 나뉜 것을 발견합니다.")
-    choice = st.radio("어디로 갈까요?", ["왼쪽 길", "오른쪽 길"])
-    if st.button("🚶 이동"):
-        if choice == "왼쪽 길":
-            st.session_state.stage = "battle"
-        else:
-            st.session_state.stage = "merchant"
-        st.rerun()
-
-elif st.session_state.stage == "battle":
-    st.write("⚔️ 당신은 길을 걷다가 몬스터와 마주쳤습니다!")
-    if st.button("전투 시작!"):
-        result = battle()
-        st.session_state.log.append(result)
-        st.rerun()
-
-elif st.session_state.stage == "merchant":
-    st.write("🧙‍♂️ 상인을 만났습니다. 포션(20골드)을 구매할 수 있습니다.")
-    if st.button("💰 포션 구매 (20골드)"):
-        if st.session_state.gold >= 20:
-            st.session_state.gold -= 20
-            st.session_state.hp = min(100, st.session_state.hp + 30)
-            st.success("체력을 30 회복했습니다!")
-        else:
-            st.error("골드가 부족합니다!")
-    if st.button("계속 이동"):
-        st.session_state.stage = "crossroad"
-        st.rerun()
-
-elif st.session_state.stage == "crossroad":
-    st.write("⛰️ 또 다른 갈림길이 나왔습니다. 여정을 계속할까요?")
-    next_choice = st.radio("다음 목적지", ["더 깊은 숲", "마을로 귀환"])
-    if st.button("이동!"):
-        if next_choice == "더 깊은 숲":
-            st.session_state.stage = "battle"
-        else:
-            st.success("🏡 마을에 도착해 퀘스트를 완료했습니다!")
-            st.session_state.hp = 100
-            st.session_state.stage = "start"
-        st.rerun()
-
-elif st.session_state.stage == "dead":
-    st.error("☠️ 게임 오버!")
-    if st.button("🔁 다시 시작"):
-        st.session_state.hp = 100
-        st.session_state.gold = 50
-        st.session_state.stage = "start"
-        st.session_state.log = []
-        st.rerun()
-
-# 전투 로그 출력
-if st.session_state.log:
-    st.subheader("📜 로그")
-    for entry in reversed(st.session_state.log[-3:]):
-        st.text(entry)
+if mood:
+    song = songs[mood]
+    st.subheader(f"🎵 추천 노래: {song['title']}")
+    st.write(f"> {song['lyrics']}")
+    st.markdown(f"[YouTube 링크]({song['youtube']})")
